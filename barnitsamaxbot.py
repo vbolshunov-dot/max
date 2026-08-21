@@ -217,8 +217,6 @@ def check_config() -> None:
         "MAX_BOT_TOKEN": MAX_BOT_TOKEN,
         "YCLIENTS_TOKEN": YCLIENTS_TOKEN,
         "YCLIENTS_COMPANY_ID": YCLIENTS_COMPANY_ID,
-        "MANAGER_CONTACT_URL": MANAGER_PHONE,
-        "MANAGER_NAME": MANAGER_NAME,
         "BIRCH_STAFF_ID": BATHS["birch"]["staff_id"],
         "PINE_STAFF_ID": BATHS["pine"]["staff_id"],
         "BIRCH_WEEKDAY_NO_PROC_SERVICE_ID": SERVICE_IDS["birch"]["weekday"]["no_proc"],
@@ -235,6 +233,13 @@ def check_config() -> None:
             "ВНИМАНИЕ: не задан YCLIENTS_USER_TOKEN. Без него YCLIENTS не даёт "
             "искать клиентов по базе, и те, кто уже есть в базе салона, не смогут "
             "зарегистрироваться в боте.",
+            file=sys.stderr,
+        )
+
+    if not MANAGER_NAME or not MANAGER_PHONE:
+        print(
+            "ВНИМАНИЕ: не заданы MANAGER_NAME / MANAGER_CONTACT_URL — контакты "
+            "менеджера в сообщениях будут пустыми. На работу бота это не влияет.",
             file=sys.stderr,
         )
 
