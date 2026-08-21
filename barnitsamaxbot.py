@@ -29,6 +29,7 @@ import json
 import logging
 import os
 import re
+import ssl
 import sys
 from collections import Counter
 from datetime import date, datetime, time as dt_time, timedelta
@@ -267,11 +268,28 @@ def check_config() -> None:
 HTTP: dict = {"client": None}
 
 
+# Корневые сертификаты НУЦ Минцифры. MAX работает на них, а в стандартном
+# хранилище контейнера их нет — без этого файла все запросы к API падают с
+# «certificate verify failed». Лежит рядом с ботом, обновляется с gu-st.ru.
+CA_BUNDLE = Path(__file__).with_name("russian_trusted_ca.pem")
+
+
+def ssl_context() -> ssl.SSLContext:
+    """Контекст, доверяющий и обычным центрам сертификации, и российским:
+    YCLIENTS живёт на первых, MAX на вторых, а клиент у нас один на всех."""
+    context = ssl.create_default_context()
+    if CA_BUNDLE.exists():
+        context.load_verify_locations(cafile=str(CA_BUNDLE))
+    else:
+        logger.error(f"Нет файла {CA_BUNDLE.name} — запросы к MAX не пройдут проверку сертификата")
+    return context
+
+
 def http_client() -> httpx.AsyncClient:
     """Отдаёт общий HTTP-клиент, при необходимости создавая его."""
     client = HTTP.get("client")
     if client is None or client.is_closed:
-        client = httpx.AsyncClient(timeout=REQUEST_TIMEOUT)
+        client = httpx.AsyncClient(timeout=REQUEST_TIMEOUT, verify=ssl_context())
         HTTP["client"] = client
     return client
 
