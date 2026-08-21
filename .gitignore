@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+max_bot_state.json
+.idea/
+ENV_VALUES.md
